@@ -1,7 +1,7 @@
 ARG PHP_FPM_VERSION
 FROM php:${PHP_FPM_VERSION}
 
-WORKDIR /var/www/html
+WORKDIR /var/www
 
 RUN docker-php-ext-install pdo pdo_mysql mysqli opcache
 

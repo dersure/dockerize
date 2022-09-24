@@ -78,7 +78,7 @@ services:
             timeout: 5s
     
     phpmyadmin:
-        image: phpmyadmin:latest
+        image: phpmyadmin:${PMA_VERSION-latest}
         container_name: ${PROJECT_NAME}_dbManager
         restart: unless-stopped
         ports:

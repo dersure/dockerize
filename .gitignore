@@ -1,5 +1,3 @@
-/.DS_Store
-/public
 docker-compose.yml
 .env
-.env.backup
+/.DS_Store

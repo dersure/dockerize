@@ -5,11 +5,18 @@ networks:
         driver: ${NETWORKS_DRIVER}
 
 services:
+    supervisor:
+        build:
+            context: ./docker/supervisor
+            dockerfile: Dockerfile      
+        networks:
+            - dersureinn
+
     php:
         build:
             context: ./docker/php
             args:
-                - PHP_FPM_VERSION=${PHP_FPM_VERSION}
+                - PHP_FPM_VERSION=${PHP_FPM_VERSION-fpm-alpine}
             dockerfile: Dockerfile
         container_name: ${PROJECT_NAME}_app
         restart: unless-stopped
@@ -43,14 +50,14 @@ services:
     apache2:
         build:
             context: ./docker/apache2
+            args:
+                - PHP_UPSTREAM_CONTAINER=${APACHE_PHP_UPSTREAM_CONTAINER}
+                - PHP_UPSTREAM_PORT=${APACHE_PHP_UPSTREAM_PORT}
+                - PHP_UPSTREAM_TIMEOUT=${APACHE_PHP_UPSTREAM_TIMEOUT}
+                - DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT}
+                - APACHE_INSTALL_HTTP2=${APACHE_INSTALL_HTTP2}            
         container_name: ${PROJECT_NAME}_apache_server
         restart: unless-stopped        
-        args:
-            - PHP_UPSTREAM_CONTAINER=${APACHE_PHP_UPSTREAM_CONTAINER}
-            - PHP_UPSTREAM_PORT=${APACHE_PHP_UPSTREAM_PORT}
-            - PHP_UPSTREAM_TIMEOUT=${APACHE_PHP_UPSTREAM_TIMEOUT}
-            - DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT}
-            - APACHE_INSTALL_HTTP2=${APACHE_INSTALL_HTTP2}
         volumes:
             - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
             - ${APACHE_HOST_LOG_PATH}:/var/log/apache2

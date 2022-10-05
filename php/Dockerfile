@@ -18,8 +18,8 @@ RUN docker-php-ext-install pdo pdo_mysql mysqli opcache
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Add user for laravel application
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
+RUN addgroup -S www
+RUN adduser -S www -G www
 
 # Copy existing application directory permissions
 COPY --chown=www:www . /var/www

@@ -1,0 +1,47 @@
+version: '3.8'
+
+networks:
+    dersureinn:
+        driver: bridge
+
+services:
+    php:
+        build:
+            context: ./docker/php/production
+            dockerfile: Dockerfile
+        expose:
+            - '9000'        
+        networks:
+            - dersureinn
+    
+    nginx:
+        build:
+            context: ./docker/nginx
+            dockerfile: Dockerfile
+        ports:
+            - '8080:80'
+            - '443:443'
+        networks:
+            - dersureinn          
+
+    mysql:
+        image: mysql:latest
+        ports:
+            - '3306:3306'            
+        environment:
+            MYSQL_DATABASE: 'default'
+            MYSQL_USER: 'default'
+            MYSQL_PASSWORD: 'secret'
+            MYSQL_ROOT_PASSWORD: 'root'
+        volumes:
+            - dbdata:/var/lib/mysql
+        networks:
+            - dersureinn
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-proot"]
+            retries: 3
+            timeout: 5s
+
+volumes:
+    dbdata:
+        driver: local

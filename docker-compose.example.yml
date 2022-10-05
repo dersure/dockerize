@@ -13,8 +13,8 @@ services:
             dockerfile: Dockerfile
         container_name: ${PROJECT_NAME}_app
         restart: unless-stopped
-        ports:
-            - '${PHP_FPM_PORT}:9000'        
+        expose:
+            - '9000'       
         volumes:
             - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
             - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini

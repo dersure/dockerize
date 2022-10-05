@@ -7,3 +7,8 @@ Clone to project directory and rename to `docker` from `dockerize`. Then copy `d
 #### `.dockerignore`
     .git
     .env
+    database.sql
+    dbml-error.log
+    .DS_Store
+    /tests/coverage
+    /docker

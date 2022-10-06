@@ -1,47 +1,32 @@
 version: '3.8'
-
-networks:
-    dersureinn:
-        driver: bridge
-
+        
 services:
-    php:
+    php-fpm:
         build:
-            context: ./docker/php/production
-            dockerfile: Dockerfile
+            context: ../images/php/fpm
+            dockerfile: Prod.Dockerfile
+            args:
+                - APP_CODE_PATH=${APP_CODE_PATH_CONTAINER}       
         expose:
-            - '9000'        
-        networks:
-            - dersureinn
-    
+            - '9000'
+
+    php-worker:
+        build:
+            context: ../images/php/worker
+            dockerfile: Dockerfile
+            args:
+                - APP_USER_ID=${APP_USER_ID}            
+                - APP_GROUP_ID=${APP_GROUP_ID}            
+                - APP_USER_NAME=${APP_USER_NAME}            
+                - APP_GROUP_NAME=${APP_GROUP_NAME}
+
     nginx:
         build:
-            context: ./docker/nginx
+            context: ../images/nginx
             dockerfile: Dockerfile
+            args:
+                - APP_CODE_PATH=${APP_CODE_PATH_CONTAINER}            
+                - NGINX_SITES=${NGINX_SITES_PATH}            
         ports:
             - '8080:80'
             - '443:443'
-        networks:
-            - dersureinn          
-
-    mysql:
-        image: mysql:latest
-        ports:
-            - '3306:3306'            
-        environment:
-            MYSQL_DATABASE: 'default'
-            MYSQL_USER: 'default'
-            MYSQL_PASSWORD: 'secret'
-            MYSQL_ROOT_PASSWORD: 'root'
-        volumes:
-            - dbdata:/var/lib/mysql
-        networks:
-            - dersureinn
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-proot"]
-            retries: 3
-            timeout: 5s
-
-volumes:
-    dbdata:
-        driver: local

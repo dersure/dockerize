@@ -1,34 +1,32 @@
 ARG PHP_FPM_VERSION
 FROM php:${PHP_FPM_VERSION}
 
-WORKDIR /var/www
+ARG APP_CODE_PATH
+ARG COMPOSER_VERSION
+ARG APP_USER_ID
+ARG APP_GROUP_ID
+ARG APP_USER_NAME
+ARG APP_GROUP_NAME
 
-# Install dependencies
-RUN apk update && apk add --no-cache supervisor
+RUN addgroup -g $APP_GROUP_ID $APP_GROUP_NAME && \
+    adduser -D -u $APP_USER_ID -s /bin/bash $APP_USER_NAME -G $APP_GROUP_NAME && \
+    chown $APP_USER_NAME: /var/run && \
+    chown $APP_USER_NAME: $APP_CODE_PATH
 
-# Install extensions
+RUN apk add --update --no-cache \
+    supervisor
+
 RUN docker-php-ext-install pdo pdo_mysql mysqli opcache
 
-# Install composer
-# RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-
-# Copy supervisor configs
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY queue-worker.conf /etc/supervisor/conf.d/php-worker.conf
 
-# Add user for laravel application
-RUN addgroup -S www
-RUN adduser -S www -G www
+COPY --from=composer:${COMPOSER_VERSION} /usr/bin/composer /usr/local/bin/composer
 
-RUN chown www:www /var/run
+WORKDIR $APP_CODE_PATH
 
-# Copy existing application directory permissions
-COPY --chown=www:www . /var/www
+USER $APP_USER_NAME
 
-# Change current user to www
-USER www
+EXPOSE 9000 9001
 
-# Expose port 9000 and start supervisor
-EXPOSE 9000
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

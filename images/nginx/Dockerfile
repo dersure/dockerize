@@ -1,4 +1,7 @@
 FROM nginx:alpine
 
-COPY ./docker/nginx/sites/ /etc/nginx/conf.d
-COPY . /var/www
+ARG APP_CODE_PATH
+ARG NGINX_SITES
+
+COPY $NGINX_SITES /etc/nginx/conf.d
+COPY . $APP_CODE_PATH

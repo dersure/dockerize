@@ -1,31 +1,28 @@
 ARG PHP_FPM_VERSION
 FROM php:${PHP_FPM_VERSION}
 
-WORKDIR /var/www
+ARG APP_CODE_PATH
+ARG COMPOSER_VERSION
+ARG APP_USER_ID
+ARG APP_GROUP_ID
+ARG APP_USER_NAME
+ARG APP_GROUP_NAME
 
-# Install dependencies
-# RUN apt-get update && apt-get install -y \
-    # build-essential
-
-# Clear cache
-# RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN addgroup -g $APP_GROUP_ID $APP_GROUP_NAME && \
+    adduser -D -u $APP_USER_ID -s /bin/bash $APP_USER_NAME -G $APP_GROUP_NAME && \
+    # mkdir -p $APP_CODE_PATH && \
+    chown $APP_USER_NAME: $APP_CODE_PATH
 
 # Install extensions
 RUN docker-php-ext-install pdo pdo_mysql mysqli opcache
 
 # Install composer
-# RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:${COMPOSER_VERSION} /usr/bin/composer /usr/local/bin/composer
 
-# Add user for laravel application
-RUN addgroup -S www
-RUN adduser -S www -G www
-
-# Copy existing application directory permissions
-COPY --chown=www:www . /var/www
+WORKDIR $APP_CODE_PATH
 
 # Change current user to www
-USER www
+USER $APP_USER_NAME
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000

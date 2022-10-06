@@ -13,8 +13,8 @@ volumes:
 services:
     php:
         build:
-            context: ../images/php/fpm/supervisor
-            dockerfile: Dockerfile
+            context: ../
+            dockerfile: ./images/php/fpm/supervisor/Dockerfile
             args:
                 - PHP_FPM_VERSION=${PHP_FPM_VERSION-fpm-alpine-fpm-alpine}
                 - APP_CODE_PATH=${APP_CODE_PATH_CONTAINER}   

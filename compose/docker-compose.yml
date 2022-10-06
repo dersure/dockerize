@@ -13,8 +13,8 @@ volumes:
 services:
     php-fpm:
         build:
-            context: ../images/php/fpm
-            dockerfile: Dockerfile
+            context: ../
+            dockerfile: ./images/php/fpm/Dockerfile
             args:
                 - PHP_FPM_VERSION=${PHP_FPM_VERSION-fpm-alpine-fpm-alpine}
                 - APP_CODE_PATH=${APP_CODE_PATH_CONTAINER}   
@@ -37,8 +37,8 @@ services:
 
     php-worker:
         build:
-            context: ../images/php/worker
-            dockerfile: Dockerfile 
+            context: ../
+            dockerfile: ./images/php/worker/Dockerfile 
             args:
                 - APP_USER_ID=${APP_USER_ID}            
                 - APP_GROUP_ID=${APP_GROUP_ID}            

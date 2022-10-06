@@ -3,8 +3,8 @@ version: '3.8'
 services:
     php-fpm:
         build:
-            context: ../images/php/fpm
-            dockerfile: Prod.Dockerfile
+            context: ../
+            dockerfile: ./images/php/fpm/Prod.Dockerfile
             args:
                 - APP_CODE_PATH=${APP_CODE_PATH_CONTAINER}       
         expose:
@@ -12,8 +12,8 @@ services:
 
     php-worker:
         build:
-            context: ../images/php/worker
-            dockerfile: Dockerfile
+            context: ../
+            dockerfile: ./images/php/worker/Dockerfile
             args:
                 - APP_USER_ID=${APP_USER_ID}            
                 - APP_GROUP_ID=${APP_GROUP_ID}            
@@ -22,8 +22,8 @@ services:
 
     nginx:
         build:
-            context: ../images/nginx
-            dockerfile: Dockerfile
+            context: ../
+            dockerfile: ./images/nginx/Dockerfile
             args:
                 - APP_CODE_PATH=${APP_CODE_PATH_CONTAINER}            
                 - NGINX_SITES=${NGINX_SITES_PATH}            

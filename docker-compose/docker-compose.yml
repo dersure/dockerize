@@ -10,13 +10,11 @@ services:
             context: ./docker/php
             args:
                 - PHP_FPM_VERSION=${PHP_FPM_VERSION-fpm-alpine-fpm-alpine}
-            dockerfile: Supervisor.Dockerfile
+            dockerfile: Dockerfile
         container_name: ${PROJECT_NAME}_app
         restart: unless-stopped
         expose:
-            - '9000'   
-        ports:
-            - '9001:9001'			    
+            - '9000'       
         volumes:
             - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
             - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -99,6 +97,15 @@ services:
         networks:
             - dersureinn
 
+    php-worker:
+        build:
+            context: ./docker/supervisor
+            dockerfile: Dockerfile   
+        ports:
+            - '9001:9001'               
+        networks:
+            - dersureinn
+            
     redis:
         image: redis:alpine
         container_name: ${PROJECT_NAME}_cache

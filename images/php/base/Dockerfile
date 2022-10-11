@@ -64,9 +64,9 @@ FROM base as local
 # RUN echo "root ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users" && \
     # echo "${APP_USER_NAME} ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users"
 
-# RUN apk add --no-cache --update \
-#         mysql-client \
-#         redis \
-#         php-xdebug~=${PHP_VERSION} \
-#     # ensure that xdebug is not enabled by default
-#     && rm -f /etc/php8/conf.d/00_xdebug.ini
+RUN apk add --no-cache --update \
+        mysql-client \
+        redis \
+        php-xdebug~=${PHP_VERSION} \
+    # ensure that xdebug is not enabled by default
+    && rm -f /etc/php8/conf.d/00_xdebug.ini

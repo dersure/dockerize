@@ -31,4 +31,6 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 FROM base as local
 
-RUN sed -i "s#/dev/stdout#$APP_CODE_PATH/storage/logs/worker.log#" /etc/supervisor/conf.d/supervisord.conf
+ARG LOG_FILE=$APP_CODE_PATH/storage/logs/worker.log
+RUN chown $APP_USER_NAME:$APP_GROUP_NAME ${LOG_FILE} && \
+    sed -i "s#/dev/stdout#$LOG_FILE#" /etc/supervisor/conf.d/supervisord.conf

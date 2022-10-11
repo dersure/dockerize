@@ -15,7 +15,7 @@ production build
 `docker-compose -f docker/compose/docker-compose.yml -p project-name --env-file docker/.env up -d`
 
 local build
-`docker-compose -f docker/compose/docker-compose.yml docker/compose/docker-compose.local.yml -p project-name --env-file docker/.env up -d`
+`docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose.local.yml -p project-name --env-file docker/.env up -d`
 
 #### `.dockerignore`
     .git

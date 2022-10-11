@@ -57,3 +57,16 @@ COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 WORKDIR $APP_CODE_PATH
 
 FROM base as local
+
+# add app user to sudoers
+# see https://ostechnix.com/add-delete-and-grant-sudo-privileges-to-users-in-alpine-linux/ for adding sudo
+# see https://askubuntu.com/a/340669 for not requiring a sudo pw
+# RUN echo "root ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users" && \
+    # echo "${APP_USER_NAME} ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users"
+
+# RUN apk add --no-cache --update \
+#         mysql-client \
+#         redis \
+#         php-xdebug~=${PHP_VERSION} \
+#     # ensure that xdebug is not enabled by default
+#     && rm -f /etc/php8/conf.d/00_xdebug.ini

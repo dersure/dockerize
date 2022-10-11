@@ -13,9 +13,7 @@ volumes:
         driver: ${VOLUMES_DRIVER}
 
 services:
-    php-fpm:      
-        build:
-            dockerfile: ./images/php/fpm/supervisor/Dockerfile               
+    php-fpm:                 
         container_name: ${PROJECT_NAME}_app
         restart: unless-stopped    
         volumes:

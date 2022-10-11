@@ -1,29 +1,21 @@
-ARG PHP_FPM_VERSION
-FROM php:${PHP_FPM_VERSION}
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE} as base
 
-ARG APP_CODE_PATH
-ARG COMPOSER_VERSION
-ARG APP_USER_ID
-ARG APP_GROUP_ID
-ARG APP_USER_NAME
-ARG APP_GROUP_NAME
+RUN echo ${PHP_VERSION}
+RUN apk add --no-cache --update php-fpm~=$PHP_VERSION && ln -s /usr/sbin/php-fpm8 /usr/bin/php-fpm
 
-RUN addgroup -g $APP_GROUP_ID $APP_GROUP_NAME && \
-    adduser -D -u $APP_USER_ID -s /bin/bash $APP_USER_NAME -G $APP_GROUP_NAME && \
-    # mkdir -p $APP_CODE_PATH && \
-    chown $APP_USER_NAME: $APP_CODE_PATH
+COPY ./images/php/fpm/php-fpm.d/ /etc/php8/php-fpm.d/
+COPY ./images/php/fpm/conf.d/${ENV}/* /etc/php8/conf.d/
+COPY ./images/php/fpm/conf.d/app-fpm.ini /etc/php8/conf.d/
 
-# Install extensions
-RUN docker-php-ext-install pdo pdo_mysql mysqli opcache
+RUN sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" /etc/php8/php-fpm.d/* \
+    && sed -i "s/__APP_GROUP_NAME/$APP_GROUP_NAME/" /etc/php8/php-fpm.d/*
 
-# Install composer
-COPY --from=composer:${COMPOSER_VERSION} /usr/bin/composer /usr/local/bin/composer
-
-WORKDIR $APP_CODE_PATH
-
-# Change current user to www
 USER $APP_USER_NAME
 
-# Expose port 9000 and start php-fpm server
 EXPOSE 9000
-CMD ["php-fpm"]
+
+# CMD ["php-fpm"]
+CMD ["php-fpm", "-F"]
+
+FROM base as local

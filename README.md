@@ -1,8 +1,21 @@
 # Docker Setup
 
-Clone to project directory and rename to `docker` from `dockerize`. Then copy `docker-compose.*.yml` files from `docker` directory to root folder (project directory).
+Clone to project directory: `git clone https://github.com/dersure/dockerize.git docker`.
 
-**Note:** If you did not rename the repo to `docker` or you changed it to another name, then you have to make changes to `docker-compose.yml` files to point to the correct path.
+### Docker Compose
+
+#### Build or rebuild php base
+
+`docker build -f docker/images/php/base/Dockerfile -t local/php-base .`
+
+`docker-compose -f docker/compose/docker-compose-php-base.yml --env-file docker/.env build`
+
+#### Create and start containers
+production build
+`docker-compose -f docker/compose/docker-compose.yml -p project-name --env-file docker/.env up -d`
+
+local build
+`docker-compose -f docker/compose/docker-compose.yml docker/compose/docker-compose.local.yml -p project-name --env-file docker/.env up -d`
 
 #### `.dockerignore`
     .git

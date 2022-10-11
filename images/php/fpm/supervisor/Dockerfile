@@ -1,32 +1,43 @@
-ARG PHP_FPM_VERSION
-FROM php:${PHP_FPM_VERSION}
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE} as base
 
-ARG APP_CODE_PATH
-ARG COMPOSER_VERSION
-ARG APP_USER_ID
-ARG APP_GROUP_ID
-ARG APP_USER_NAME
-ARG APP_GROUP_NAME
+RUN echo ${PHP_VERSION}
+RUN apk add --no-cache --update php-fpm~=$PHP_VERSION && ln -s /usr/sbin/php-fpm8 /usr/bin/php-fpm
 
-RUN addgroup -g $APP_GROUP_ID $APP_GROUP_NAME && \
-    adduser -D -u $APP_USER_ID -s /bin/bash $APP_USER_NAME -G $APP_GROUP_NAME && \
-    chown $APP_USER_NAME: /var/run && \
-    chown $APP_USER_NAME: $APP_CODE_PATH
+COPY ./images/php/fpm/php-fpm.d/ /etc/php8/php-fpm.d/
+COPY ./images/php/fpm/conf.d/${ENV}/* /etc/php8/conf.d/
+COPY ./images/php/fpm/conf.d/app-fpm.ini /etc/php8/conf.d/
+
+RUN sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" /etc/php8/php-fpm.d/* \
+    && sed -i "s/__APP_GROUP_NAME/$APP_GROUP_NAME/" /etc/php8/php-fpm.d/*
 
 RUN apk add --update --no-cache \
     supervisor
 
-RUN docker-php-ext-install pdo pdo_mysql mysqli opcache
+COPY ./images/php/fpm/supervisor/conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY queue-worker.conf /etc/supervisor/conf.d/php-worker.conf
+ARG SUPERVISOR_PORT=9001
+ARG SUPERVISOR_USER_NAME=root
+ARG SUPERVISOR_PASSWORD=123
+ARG PHP_WORKER_PROCESS_NUMBER
+ARG PHP_WORKER_COMMAND="php $APP_CODE_PATH/artisan queue:work"
+ARG PHP_WORKER_COMMAND_ARGS
 
-COPY --from=composer:${COMPOSER_VERSION} /usr/bin/composer /usr/local/bin/composer
-
-WORKDIR $APP_CODE_PATH
+RUN sed -i "s#command=__PHP_WORKER_COMMAND#command=$PHP_WORKER_COMMAND $PHP_WORKER_COMMAND_ARGS#" /etc/supervisor/conf.d/supervisord.conf \
+    && sed -i "s/numprocs=__PHP_WORKER_PROCESSES_NUMBER/numprocs=$PHP_WORKER_PROCESS_NUMBER/" /etc/supervisor/conf.d/supervisord.conf \
+    && sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" /etc/supervisor/conf.d/supervisord.conf \
+    && sed -i "s/__SUPERVISOR_PORT/$SUPERVISOR_PORT/" /etc/supervisor/conf.d/supervisord.conf \
+    && sed -i "s/__SUPERVISOR_USER_NAME/$SUPERVISOR_USER_NAME/" /etc/supervisor/conf.d/supervisord.conf \
+    && sed -i "s/__SUPERVISOR_PASSWORD/$SUPERVISOR_PASSWORD/" /etc/supervisor/conf.d/supervisord.conf \
+    && chown $APP_USER_NAME:$APP_GROUP_NAME /var/run/
 
 USER $APP_USER_NAME
 
 EXPOSE 9000 9001
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+FROM base as local
+
+RUN sed -i "s#logfile=/dev/null#logfile=$APP_CODE_PATH/storage/logs/supervisord.log#" /etc/supervisor/conf.d/supervisord.conf \
+    && sed -i "s#/dev/stdout#$APP_CODE_PATH/storage/logs/worker.log#" /etc/supervisor/conf.d/supervisord.conf

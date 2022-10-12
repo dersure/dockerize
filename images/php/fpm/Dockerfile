@@ -7,6 +7,10 @@ RUN apk add --no-cache --update php-fpm~=$PHP_VERSION && ln -s /usr/sbin/php-fpm
 COPY ./images/php/fpm/php-fpm.d/ /etc/php8/php-fpm.d/
 COPY ./images/php/fpm/conf.d/app-fpm.ini /etc/php8/conf.d/
 
+RUN if [ ${ENV} == "local" ]; then \
+    COPY ./images/php/fpm/conf.d/${ENV}/* /etc/php8/conf.d/ \
+;fi
+
 RUN sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" /etc/php8/php-fpm.d/* \
     && sed -i "s/__APP_GROUP_NAME/$APP_GROUP_NAME/" /etc/php8/php-fpm.d/*
 
@@ -18,5 +22,3 @@ EXPOSE 9000
 CMD ["php-fpm", "-F"]
 
 FROM base as local
-
-COPY ./images/php/fpm/conf.d/${ENV}/* /etc/php8/conf.d/

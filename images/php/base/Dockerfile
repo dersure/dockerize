@@ -51,6 +51,10 @@ RUN apk --update-cache add ca-certificates && \
 
 COPY ./images/php/base/conf.d/app.ini /etc/php8/conf.d/
 
+RUN if [ ${ENV} == "local" ]; then \
+    COPY ./images/php/base/conf.d/app-${ENV}.ini /etc/php8/conf.d/ \
+;fi
+
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR $APP_CODE_PATH
@@ -62,8 +66,6 @@ FROM base as local
 # see https://askubuntu.com/a/340669 for not requiring a sudo pw
 # RUN echo "root ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users" && \
     # echo "${APP_USER_NAME} ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users"
-
-COPY ./images/php/base/conf.d/app-${ENV}.ini /etc/php8/conf.d/
 
 RUN apk add --no-cache --update \
         mysql-client \

@@ -39,6 +39,7 @@ RUN apk --update-cache add ca-certificates && \
         php-curl~=${PHP_VERSION} \
         php-dom~=${PHP_VERSION} \
         php-mbstring~=${PHP_VERSION} \
+        php-opcache~=${PHP_VERSION} \
         php-pdo_mysql~=${PHP_VERSION} \
         php-pdo~=${PHP_VERSION} \
         php-phar~=${PHP_VERSION} \

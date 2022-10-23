@@ -2,7 +2,7 @@ version: '3.8'
         
 services:
     php-base:
-        image: ${DOCKER_NAMESPACE?}/php-base-${ENV?}:${TAG?}
+        image: ${DOCKER_NAMESPACE?}/php-base-local:mac
         build:
             context: ../
             dockerfile: ./images/php/base/Dockerfile
@@ -11,11 +11,13 @@ services:
                 - PHP_VERSION=${PHP_VERSION?}
                 - APP_CODE_PATH=${APP_CODE_PATH_CONTAINER?} 
                 - COMPOSER_VERSION=${COMPOSER_VERSION?}
-                - ENV=${ENV?}   
-                - INSTALL_OPCACHE=${PHP_INSTALL_OPCACHE}    
+                - ENV=local
+                - INSTALL_MYSQL_CLIENT=false
+                - INSTALL_OPCACHE=true
+                - INSTALL_REDIS=false
+                - INSTALL_XDEBUG=false    
                 - APP_USER_ID=${APP_USER_ID?}            
                 - APP_GROUP_ID=${APP_GROUP_ID?}            
                 - APP_USER_NAME=${APP_USER_NAME?}            
                 - APP_GROUP_NAME=${APP_GROUP_NAME?}
-            target: ${ENV?}
-        
+            target: local

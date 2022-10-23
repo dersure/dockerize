@@ -1,5 +1,9 @@
 ##@ [Application: Commands]
 
+.PHONY: phpversion	
+phpversion: ## Retrieve php version
+	$(EXECUTE_IN_WORKER_CONTAINER) php -v
+
 # @see https://stackoverflow.com/a/43076457
 .PHONY: restart-php-fpm
 restart-php-fpm: ## Restart the php-fpm service

@@ -3,7 +3,7 @@
 .PHONY: setup
 setup: ## Setup the application
 	"$(MAKE)" composer ARGS="install"
-	"$(MAKE)" setup-db
+	$(EXECUTE_IN_APPLICATION_CONTAINER) php artisan app:setup;
 
 .PHONY: setup-db
 setup-db: ## Setup the DB tables

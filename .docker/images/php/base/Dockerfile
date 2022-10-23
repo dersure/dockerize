@@ -39,7 +39,6 @@ RUN apk --update-cache add ca-certificates && \
         php-curl~=${PHP_VERSION} \
         php-dom~=${PHP_VERSION} \
         php-mbstring~=${PHP_VERSION} \
-        php-opcache~=${PHP_VERSION} \
         php-pdo_mysql~=${PHP_VERSION} \
         php-pdo~=${PHP_VERSION} \
         php-phar~=${PHP_VERSION} \
@@ -50,7 +49,18 @@ RUN apk --update-cache add ca-certificates && \
 # make "php" as command available by creating a symlink 
         && ln -s /usr/bin/php8 /usr/bin/php
 
+ARG INSTALL_OPCACHE=false
+RUN if [ ${INSTALL_OPCACHE} = true ]; then \
+    apk add --no-cache --update php-opcache~=${PHP_VERSION} \
+;fi
+
+# make bash default shell
+# RUN sed -e 's;/bin/ash$;/bin/bash;g' -i /etc/passwd
+
 COPY ./images/php/base/conf.d/app.ini /etc/php8/conf.d/
+
+COPY ./images/php/base/.bashrc /home/${APP_USER_NAME}/.bashrc
+COPY ./images/php/base/.bashrc /root/.bashrc
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
@@ -64,13 +74,23 @@ FROM base as local
 # RUN echo "root ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users" && \
     # echo "${APP_USER_NAME} ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users"
 
-COPY ./images/php/base/conf.d/app-${ENV}.ini /etc/php8/conf.d/
+ARG INSTALL_MYSQL_CLIENT=false
+RUN if [ ${INSTALL_MYSQL_CLIENT} = true ]; then \
+    apk add --no-cache --update mysql-client \
+;fi
 
-RUN apk add --no-cache --update \
-        mysql-client \
-        redis \
-        php-xdebug~=${PHP_VERSION} \
+ARG INSTALL_REDIS=false
+RUN if [ ${INSTALL_REDIS} = true ]; then \
+    apk add --no-cache --update redis \
+;fi
+
+ARG INSTALL_XDEBUG=false
+RUN if [ ${INSTALL_XDEBUG} = true ]; then \
+    apk add --no-cache --update php-xdebug~=${PHP_VERSION} \
     # ensure that xdebug is not enabled by default
-    && rm -f /etc/php8/conf.d/00_xdebug.ini
+    && rm -f /etc/php8/conf.d/00_xdebug.ini \
+;fi
+
+COPY ./images/php/base/conf.d/app-${ENV}.ini /etc/php8/conf.d/
 
 FROM base as production

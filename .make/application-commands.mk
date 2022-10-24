@@ -11,15 +11,15 @@ restart-php-fpm: ## Restart the php-fpm service
 
 .PHONY: restart-workers
 restart-workers: ## Restart all workers 
-	$(EXECUTE_IN_WORKER_CONTAINER) supervisorctl restart all
+	$(EXECUTE_IN_WORKER_CONTAINER) /usr/bin/supervisorctl -c /etc/supervisor/conf.d/supervisord.conf restart all
 
 .PHONY: stop-workers
 stop-workers: ## Stop all workers 
-	$(EXECUTE_IN_WORKER_CONTAINER) supervisorctl stop worker:*
+	$(EXECUTE_IN_WORKER_CONTAINER) /usr/bin/supervisorctl -c /etc/supervisor/conf.d/supervisord.conf stop worker:*
 
 .PHONY: start-workers
 start-workers: ## start all workers 
-	$(EXECUTE_IN_WORKER_CONTAINER) supervisorctl start worker:*
+	$(EXECUTE_IN_WORKER_CONTAINER) /usr/bin/supervisorctl -c /etc/supervisor/conf.d/supervisord.conf start worker:*
 
 .PHONY: execute-in-container
 execute-in-container: ## Execute a command in a container. E.g. via "make execute-in-container DOCKER_SERVICE_NAME=php-fpm COMMAND="echo 'hello'"
@@ -38,3 +38,12 @@ disable-xdebug: ## Disable xdebug in the given container specified by "DOCKER_SE
 .PHONY: clear-queue
 clear-queue: ## Clear the job queue
 	$(EXECUTE_IN_APPLICATION_CONTAINER) php artisan queue:clear $(ARGS)
+
+.PHONY: get-env
+get-env: ## Get variable value from an environment file
+	$(EXECUTE_IN_APPLICATION_CONTAINER) php artisan env:get $(ARGS)
+
+.PHONY: set-env
+set-env: ## Update an environment variable value in .env file
+	$(EXECUTE_IN_APPLICATION_CONTAINER) php artisan env:set $(ARGS)
+	

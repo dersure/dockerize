@@ -6,7 +6,7 @@ networks:
 
 services:
     php-fpm:                 
-        container_name: ${PROJECT_NAME:-project}_php
+        container_name: ${APP_NAME:-project}_php
         restart: unless-stopped    
         volumes:
             - ${APP_CODE_PATH_HOST?}:${APP_CODE_PATH_CONTAINER?}          
@@ -14,7 +14,7 @@ services:
             - dersureinn
 
     php-worker:        
-        container_name: ${PROJECT_NAME:-project}_worker
+        container_name: ${APP_NAME:-project}_worker
         restart: unless-stopped        
         ports:
             - '9001:9001'      
@@ -24,7 +24,7 @@ services:
             - dersureinn
 
     nginx:
-        container_name: ${PROJECT_NAME:-project}_nginx_server
+        container_name: ${APP_NAME:-project}_nginx_server
         restart: unless-stopped
         ports:
             - '${NGINX_HOST_HTTP_PORT:-80}:80'
@@ -33,27 +33,5 @@ services:
             - ${APP_CODE_PATH_HOST?}:${APP_CODE_PATH_CONTAINER?}
         depends_on:
             - php-fpm
-        networks:
-            - dersureinn
-
-    application:
-        image: ${DOCKER_NAMESPACE?}/application-${ENV?}:${TAG?}
-        build:
-            context: ../
-            dockerfile: ./images/php/application/Dockerfile
-            args:
-                - BASE_IMAGE=${DOCKER_NAMESPACE?}/php-base-${ENV?}:${TAG?}
-                - APP_SSH_PASSWORD=${APP_SSH_PASSWORD?}
-                - ENV=${ENV?}
-        container_name: ${PROJECT_NAME:-project}_application
-        cap_add:
-            - "SYS_PTRACE"
-        security_opt:
-            - "seccomp=unconfined"
-        volumes:
-            - ${APP_CODE_PATH_HOST?}:${APP_CODE_PATH_CONTAINER?}    
-        ports:
-            - "${APPLICATION_SSH_HOST_PORT:-2222}:22"
-        tty: true            
         networks:
             - dersureinn

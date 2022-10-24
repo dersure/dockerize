@@ -14,7 +14,7 @@ volumes:
 
 services:
     php-fpm:                 
-        container_name: ${APP_NAME:-project}_php
+        container_name: ${PROJECT_NAME:-project}_php
         restart: unless-stopped    
         volumes:
             - ${APP_CODE_PATH_HOST?}:${APP_CODE_PATH_CONTAINER?}          
@@ -22,7 +22,7 @@ services:
             - dersureinn
 
     php-worker:        
-        container_name: ${APP_NAME:-project}_worker
+        container_name: ${PROJECT_NAME:-project}_worker
         restart: unless-stopped        
         ports:
             - '9001:9001'      
@@ -32,7 +32,7 @@ services:
             - dersureinn
 
     nginx:
-        container_name: ${APP_NAME:-project}_nginx_server
+        container_name: ${PROJECT_NAME:-project}_nginx_server
         restart: unless-stopped
         ports:
             - '${NGINX_HOST_HTTP_PORT:-80}:80'
@@ -55,7 +55,7 @@ services:
                 - ENV=${ENV?}
         # cap_add and security_opt are required to enable strace
         # @see https://stackoverflow.com/a/46676868
-        container_name: ${APP_NAME:-project}_application
+        container_name: ${PROJECT_NAME:-project}_application
         cap_add:
             - "SYS_PTRACE"
         security_opt:
@@ -70,7 +70,7 @@ services:
 
     mysql:
         image: mysql:${MYSQL_VERSION?}
-        container_name: ${APP_NAME:-project}_db
+        container_name: ${PROJECT_NAME:-project}_db
         restart: unless-stopped
         ports:
             - '${MYSQL_HOST_PORT}:3306'            
@@ -90,7 +90,7 @@ services:
             
     redis:
         image: redis:${REDIS_VERSION?}
-        container_name: ${APP_NAME:-project}_cache
+        container_name: ${PROJECT_NAME:-project}_cache
         restart: unless-stopped        
         ports:
             - '${REDIS_HOST_PORT}:6379'

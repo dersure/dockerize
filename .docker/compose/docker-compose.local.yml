@@ -23,9 +23,7 @@ services:
 
     php-worker:        
         container_name: ${APP_NAME:-project}_worker
-        restart: unless-stopped        
-        ports:
-            - '9001:9001'      
+        restart: unless-stopped
         volumes:
             - ${APP_CODE_PATH_HOST?}:${APP_CODE_PATH_CONTAINER?}
         networks:

@@ -22,15 +22,11 @@ make docker-up
 info "Clearing DB"
 sleep 0.5
 php artisan env:set DB_USERNAME root
-make setup-db ARGS="profile --drop"
+make setup-db ARGS=--drop
 php artisan env:set DB_USERNAME $DB_USER
 
 info "Stopping workers"
 make stop-workers
-
-info "Clearing RabbitMQ"
-sleep 0.5
-sh setup-rabbitmq.sh
 
 # info "Ensuring that queue and db are empty"
 # curl -sS "http://127.0.0.1/?queue"

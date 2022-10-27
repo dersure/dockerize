@@ -27,6 +27,13 @@ RUN addgroup -g $APP_GROUP_ID $APP_GROUP_NAME && \
     mkdir -p $APP_CODE_PATH && \
     chown $APP_USER_NAME: $APP_CODE_PATH
 
+RUN apk add --update --no-cache \
+        # bash \
+        make
+        # strace \
+        # sudo \
+        # vim
+
 # install PHP
 # Note: we need to use a custom apk repository because the official ones will
 #       likely not include the latest PHP version.

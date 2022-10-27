@@ -8,9 +8,6 @@ $1
 "
 }
 
-### constants
-DB_USER=`php artisan env:get DB_USERNAME`
-
 info "Building the docker setup"
 make make-init
 make docker-build
@@ -21,9 +18,7 @@ make docker-up
 
 info "Clearing DB"
 sleep 0.5
-php artisan env:set DB_USERNAME root
 make setup-db ARGS=--drop
-php artisan env:set DB_USERNAME $DB_USER
 
 info "Stopping workers"
 make stop-workers

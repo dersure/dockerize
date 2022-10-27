@@ -50,6 +50,7 @@ RUN apk --update-cache add ca-certificates && \
         php-pdo~=${PHP_VERSION} \
         php-phar~=${PHP_VERSION} \
         php-redis~=${PHP_VERSION} \
+        php-sockets~=${PHP_VERSION} \
         php-xml~=${PHP_VERSION} \
         php-zlib~=${PHP_VERSION} \
         php8~=${PHP_VERSION} \

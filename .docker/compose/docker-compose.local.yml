@@ -41,30 +41,6 @@ services:
             - php-fpm
         networks:
             - dersureinn
-    
-    application:
-        image: ${DOCKER_NAMESPACE?}/application-${ENV?}:${TAG?}
-        build:
-            context: ../
-            dockerfile: ./images/php/application/Dockerfile
-            args:
-                - BASE_IMAGE=${DOCKER_NAMESPACE?}/php-base-${ENV?}:${TAG?}
-                - APP_SSH_PASSWORD=${APP_SSH_PASSWORD?}
-                - ENV=${ENV?}
-        # cap_add and security_opt are required to enable strace
-        # @see https://stackoverflow.com/a/46676868
-        container_name: ${APP_NAME:-project}_application
-        cap_add:
-            - "SYS_PTRACE"
-        security_opt:
-            - "seccomp=unconfined"
-        volumes:
-            - ${APP_CODE_PATH_HOST?}:${APP_CODE_PATH_CONTAINER?}    
-        ports:
-            - "${APPLICATION_SSH_HOST_PORT:-2222}:22"
-        tty: true            
-        networks:
-            - dersureinn
 
     mysql:
         image: mysql:${MYSQL_VERSION?}

@@ -1,10 +1,10 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE} as base
 
+# Install supervisor
 RUN apk add --update --no-cache supervisor
 
-COPY ./images/php/worker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
+# Configure supervisor/worker
 ARG SUPERVISOR_LOG=/var/log/supervisor
 ARG SUPERVISOR_PORT=9001
 ARG SUPERVISOR_USER_NAME=root
@@ -12,7 +12,7 @@ ARG SUPERVISOR_PASSWORD=123
 ARG PHP_WORKER_PROCESS_NUMBER
 ARG PHP_WORKER_COMMAND="php $APP_CODE_PATH/artisan queue:work"
 ARG PHP_WORKER_COMMAND_ARGS
-
+COPY ./images/php/worker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN sed -i "s#command=__PHP_WORKER_COMMAND#command=$PHP_WORKER_COMMAND $PHP_WORKER_COMMAND_ARGS#" /etc/supervisor/conf.d/supervisord.conf \
     && sed -i "s/numprocs=__PHP_WORKER_PROCESSES_NUMBER/numprocs=$PHP_WORKER_PROCESS_NUMBER/" /etc/supervisor/conf.d/supervisord.conf \
     && sed -i "s#__SUPERVISOR_LOG#$SUPERVISOR_LOG#" /etc/supervisor/conf.d/supervisord.conf \
@@ -24,10 +24,13 @@ RUN sed -i "s#command=__PHP_WORKER_COMMAND#command=$PHP_WORKER_COMMAND $PHP_WORK
     && chown $APP_USER_NAME:$APP_GROUP_NAME ${SUPERVISOR_LOG} \
     && chown $APP_USER_NAME:$APP_GROUP_NAME /var/run/
 
+# Switch to use a non-root user from here on
 USER $APP_USER_NAME
 
+# Expose the port supervisor is reachable on
 EXPOSE 9001
 
+# Let supervisord start php-worker
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 FROM base as local

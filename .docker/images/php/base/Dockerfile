@@ -65,6 +65,7 @@ COPY ./images/php/base/.bashrc /root/.bashrc
 # Create symlink for php - make "php" as command available by creating a symlink 
 RUN ln -s /usr/bin/php${PHP_VERSION} /usr/bin/php
 
+# Setup document root
 WORKDIR $APP_CODE_PATH
 
 FROM base as local

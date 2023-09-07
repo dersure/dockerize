@@ -1,0 +1,12 @@
+version: '3.8'
+        
+services:
+    php-nginx:                 
+        image: ${DOCKER_NAMESPACE?}/php-nginx-laravel
+        build:
+            context: ../
+            dockerfile: ./images/php-nginx/Dockerfile
+            args:
+                - BASE_IMAGE=${DOCKER_NAMESPACE?}/php-base-${ENV?}:${TAG?}
+                - NGINX_VERSION=${NGINX_VERSION}
+                - NGINX_ROOT=${APP_CODE_PATH_CONTAINER}/public

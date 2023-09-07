@@ -1,0 +1,13 @@
+version: '3.8'
+        
+services:
+    nginx:
+        image: ${DOCKER_NAMESPACE?}/nginx-laravel-${ENV?}:${TAG?}
+        build:
+            context: ../
+            dockerfile: ./images/nginx/Dockerfile
+            target: ${ENV?}
+            args:
+                - NGINX_VERSION=${NGINX_VERSION}
+                - NGINX_ROOT=${APP_CODE_PATH_CONTAINER}/public
+                

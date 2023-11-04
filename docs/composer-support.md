@@ -33,7 +33,6 @@ RUN composer install \
 
 # Continue stage build with the desired image and copy the source including the dependencies downloaded by composer
 ARG BASE_IMAGE
-ARG APP_CODE_PATH
 FROM ${BASE_IMAGE}
 COPY --chown=nginx --from=composer /app $APP_CODE_PATH
 ```

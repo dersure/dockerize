@@ -1,0 +1,45 @@
+version: '3.9'
+        
+services:
+    php-base:
+        image: dersure/php-base:latest
+        build:
+            context: ../
+            dockerfile: ./images/php/base/Dockerfile
+            args:
+                - ALPINE_VERSION=3.18
+                - PHP_VERSION=82
+                - APP_CODE_PATH=/var/www
+                - COMPOSER_VERSION=latest
+                - ENV=production
+                - INSTALL_MYSQL_CLIENT=false
+                - INSTALL_OPCACHE=true
+                - INSTALL_REDIS=false
+                - INSTALL_XDEBUG=false    
+                - APP_USER_ID=10000        
+                - APP_GROUP_ID=10001            
+                - APP_USER_NAME=application            
+                - APP_GROUP_NAME=application
+            target: production
+
+    php-base-grpc:
+        image: dersure/php-base-grpc:latest
+        build:
+            context: ../
+            dockerfile: ./images/php/base/Dockerfile
+            args:
+                - ALPINE_VERSION=3.18
+                - PHP_VERSION=82
+                - APP_CODE_PATH=/var/www
+                - COMPOSER_VERSION=latest
+                - ENV=production
+                - INSTALL_MYSQL_CLIENT=false
+                - INSTALL_OPCACHE=true
+                - INSTALL_GRPC=true
+                - INSTALL_REDIS=false
+                - INSTALL_XDEBUG=false    
+                - APP_USER_ID=10000        
+                - APP_GROUP_ID=10001            
+                - APP_USER_NAME=application            
+                - APP_GROUP_NAME=application
+            target: production

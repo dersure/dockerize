@@ -1,0 +1,11 @@
+version: '3.9'
+        
+services:
+    php-roadrunner:                 
+        image: dersure/php-roadrunner
+        build:
+            context: ../
+            dockerfile: ./images/php/roadrunner/Dockerfile
+            target: production
+            args:
+                - BASE_IMAGE=dersure/php-base-grpc:latest

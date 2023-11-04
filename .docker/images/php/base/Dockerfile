@@ -41,17 +41,25 @@ RUN apk --update-cache add ca-certificates && \
         php${PHP_VERSION}-curl \
         php${PHP_VERSION}-dom \
         php${PHP_VERSION}-mbstring \
+        php${PHP_VERSION}-mysqli \
         php${PHP_VERSION}-pdo_mysql \
         php${PHP_VERSION}-pdo \
         php${PHP_VERSION}-phar \
         php${PHP_VERSION}-redis \
         php${PHP_VERSION}-sockets \
+        php${PHP_VERSION}-tokenizer \
         php${PHP_VERSION}-xml \
         php${PHP_VERSION}-zlib
 
 ARG INSTALL_OPCACHE=false
 RUN if [ ${INSTALL_OPCACHE} = true ]; then \
     apk add --no-cache --update php${PHP_VERSION}-opcache \
+;fi
+
+ARG INSTALL_GRPC=false
+RUN if [ ${INSTALL_GRPC} = true ]; then \
+    apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing php${PHP_VERSION}-pecl-grpc \
+    # php82-pecl-grpc-1.58.0-r0.apk
 ;fi
 
 # make bash default shell

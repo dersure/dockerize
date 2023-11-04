@@ -2,9 +2,11 @@
 
 Build and start sample container from root
 
-#### Build or rebuild php base
+#### Build or rebuild php base with Docker Compose
 
 `docker-compose -f .docker/compose/docker-compose-php-base.yml --env-file .docker/.env build`
+
+`docker-compose -f .docker/compose/docker-compose-php-nginx.yml --env-file .docker/.env build`
 
 #### Create and start containers
 production build

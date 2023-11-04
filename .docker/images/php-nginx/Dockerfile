@@ -1,5 +1,14 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=dersure/php-base:latest
 FROM ${BASE_IMAGE} as base
+
+LABEL maintainer="Dersure Limited <dev0@dersureltd.com>"
+
+# Accepted values: app - worker - scheduler
+ARG CONTAINER_MODE=app
+
+ARG APP_WITH_QUEUE=false
+ARG APP_WITH_RABBITMQ=false
+ARG APP_WITH_SCHEDULER=false
 
 # Install packages
 RUN apk add --no-cache --update \
@@ -8,11 +17,11 @@ RUN apk add --no-cache --update \
     supervisor
 
 # Configure nginx - http
-COPY ./images/php-nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./images/php-nginx/config/nginx.conf /etc/nginx/nginx.conf
 
 # Configure nginx - default server
 ARG NGINX_ROOT=$APP_CODE_PATH
-COPY ./images/php-nginx/conf.d/default.conf /etc/nginx/conf.d/
+COPY ./images/php-nginx/config/conf.d/default.conf /etc/nginx/conf.d/
 RUN sed -i "s#root __NGINX_ROOT;#root $NGINX_ROOT;#" /etc/nginx/conf.d/default.conf
 
 # Configure php-fpm
@@ -21,20 +30,71 @@ COPY ./images/php/fpm/conf.d/app-fpm.ini /etc/php${PHP_VERSION}/conf.d/
 RUN sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" /etc/php${PHP_VERSION}/php-fpm.d/* \
     && sed -i "s/__APP_GROUP_NAME/$APP_GROUP_NAME/" /etc/php${PHP_VERSION}/php-fpm.d/*
 
-# Configure supervisor/worker
-ARG SUPERVISOR_LOG=/var/log/supervisor
+###########################################
+# Configure supervisor
+###########################################
+
+ARG LOG_PATH=/var/log/supervisor
 ARG SUPERVISOR_PORT=9001
 ARG SUPERVISOR_USER_NAME=root
 ARG SUPERVISOR_PASSWORD=123
-COPY ./images/php-nginx/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-RUN sed -i "s#__SUPERVISOR_LOG#$SUPERVISOR_LOG#" /etc/supervisor/conf.d/supervisord.conf \
-    && sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" /etc/supervisor/conf.d/supervisord.conf \
-    && sed -i "s/__SUPERVISOR_PORT/$SUPERVISOR_PORT/" /etc/supervisor/conf.d/supervisord.conf \
-    && sed -i "s/__SUPERVISOR_USER_NAME/$SUPERVISOR_USER_NAME/" /etc/supervisor/conf.d/supervisord.conf \
-    && sed -i "s/__SUPERVISOR_PASSWORD/$SUPERVISOR_PASSWORD/" /etc/supervisor/conf.d/supervisord.conf \
-    && mkdir ${SUPERVISOR_LOG} \
-    && chown $APP_USER_NAME:$APP_GROUP_NAME ${SUPERVISOR_LOG} \
+
+ENV SUPERVISOR_CONF_PATH=/etc/supervisor/conf.d
+ENV SUPERVISOR_CONF=${SUPERVISOR_CONF_PATH}/supervisord.conf
+
+COPY ./images/php-nginx/config/supervisord.conf ${SUPERVISOR_CONF}
+
+RUN sed -i "s#__LOG_PATH#$LOG_PATH#" ${SUPERVISOR_CONF} \
+    && sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" ${SUPERVISOR_CONF} \
+    && sed -i "s/__SUPERVISOR_PORT/$SUPERVISOR_PORT/" ${SUPERVISOR_CONF} \
+    && sed -i "s/__SUPERVISOR_USER_NAME/$SUPERVISOR_USER_NAME/" ${SUPERVISOR_CONF} \
+    && sed -i "s/__SUPERVISOR_PASSWORD/$SUPERVISOR_PASSWORD/" ${SUPERVISOR_CONF} \
+    && mkdir ${LOG_PATH} \
+    && chown $APP_USER_NAME:$APP_GROUP_NAME ${LOG_PATH} \
     && chown $APP_USER_NAME:$APP_GROUP_NAME /var/run/
+
+###########################################
+
+###########################################
+# Laravel Workers
+###########################################
+
+COPY ./images/php-nginx/config/supervisor/laravel-queue.conf ${SUPERVISOR_CONF_PATH}/queue.conf
+COPY ./images/php-nginx/config/supervisor/laravel-rabbitmq.conf ${SUPERVISOR_CONF_PATH}/rabbitmq.conf
+
+RUN if [ ${CONTAINER_MODE} != 'worker' ] && [ ${APP_WITH_QUEUE} = false ]; then \
+  rm ${SUPERVISOR_CONF_PATH}/queue.conf \
+;fi
+
+RUN if [ ${APP_WITH_RABBITMQ} = false ]; then \
+  rm ${SUPERVISOR_CONF_PATH}/rabbitmq.conf \
+;fi
+
+###########################################
+
+###########################################
+# Laravel scheduler
+###########################################
+
+COPY ./images/php-nginx/config/supervisor/laravel-scheduler.conf ${SUPERVISOR_CONF_PATH}/scheduler.conf
+
+RUN if [ ${CONTAINER_MODE} != 'scheduler' ] && [ ${APP_WITH_SCHEDULER} = false ]; then \
+  rm ${SUPERVISOR_CONF_PATH}/scheduler.conf \
+;fi
+
+# RUN if [ ${CONTAINER_MODE} = 'scheduler' ] || [ ${APP_WITH_SCHEDULER} = true ]; then \
+#   wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.26/supercronic-linux-amd64" \
+#   -O /usr/bin/supercronic \
+#   && chmod +x /usr/bin/supercronic \
+#   && mkdir -p /etc/supercronic \
+#   && echo "*/1 * * * * php ${APP_CODE_PATH}/artisan schedule:run --verbose --no-interaction" > /etc/supercronic/laravel; \
+# fi
+
+###########################################
+
+# Include executable
+COPY ./images/php-nginx/run.sh /usr/bin/start-container
+RUN chmod +x /usr/bin/start-container
 
 # Make sure files/folders needed by the processes are accessable when they run under the nobody user
 RUN chown -R $APP_USER_NAME.$APP_GROUP_NAME $APP_CODE_PATH /run /var/lib/nginx /var/log/nginx
@@ -43,12 +103,12 @@ RUN chown -R $APP_USER_NAME.$APP_GROUP_NAME $APP_CODE_PATH /run /var/lib/nginx /
 USER $APP_USER_NAME
 
 # Expose the port nginx is reachable on
-EXPOSE 80
+EXPOSE 80 443
 
 # Let supervisord start nginx & php-fpm
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
-# Configure a healthcheck to validate that everything is up&running
+# Configure a healthcheck to validate that everything is up & running
 HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:80/fpm-ping
 
 FROM base as local

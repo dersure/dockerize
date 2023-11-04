@@ -19,6 +19,9 @@ initialStuff() {
 
     # Remove this line if you do not want to run migrations on each build
     php artisan migrate --force
+
+    # Make public files accessible from the web
+    php artisan storage:link
 }
 
 initialStuff

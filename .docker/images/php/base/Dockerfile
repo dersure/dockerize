@@ -38,6 +38,7 @@ RUN apk --update-cache add ca-certificates && \
     echo "php${PHP_VERSION}" && \
     apk add --update --no-cache  \
         php${PHP_VERSION} \
+        php${PHP_VERSION}-bcmath \
         php${PHP_VERSION}-curl \
         php${PHP_VERSION}-dom \
         php${PHP_VERSION}-mbstring \

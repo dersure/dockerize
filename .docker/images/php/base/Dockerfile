@@ -43,7 +43,6 @@ RUN apk --update-cache add ca-certificates && \
         php${PHP_VERSION}-dom \
         php${PHP_VERSION}-fileinfo \
         php${PHP_VERSION}-ftp \
-        php${PHP_VERSION}-gd \
         php${PHP_VERSION}-mbstring \
         php${PHP_VERSION}-mysqli \
         php${PHP_VERSION}-pdo_mysql \

@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
     php-nginx:                 
-        image: dersure/php-nginx
+        image: marin63/php-nginx
         build:
             context: ../
             dockerfile: ./images/php-nginx/Dockerfile
@@ -10,8 +10,8 @@ services:
                 - BASE_IMAGE=dersure/php-base:latest
                 - NGINX_VERSION=alpine
 
-    php-nginx-grpc:                 
-        image: dersure/php-nginx-grpc
+    php-nginx-grpc:             
+        image: marin63/php-nginx-grpc
         build:
             context: ../
             dockerfile: ./images/php-nginx/Dockerfile
@@ -19,60 +19,3 @@ services:
                 - BASE_IMAGE=dersure/php-base-grpc:latest
                 - NGINX_VERSION=alpine
                 - NGINX_ROOT=/var/www/public
-
-    laravel:                 
-        image: dersure/laravel
-        build:
-            context: ../
-            dockerfile: ./images/php-nginx/Dockerfile
-            args:
-                - BASE_IMAGE=dersure/php-base-grpc:latest
-                - NGINX_VERSION=alpine
-                - NGINX_ROOT=/var/www/public
-                
-    laravel-queue:                 
-        image: dersure/laravel-queue
-        build:
-            context: ../
-            dockerfile: ./images/php-nginx/Dockerfile
-            args:
-                - BASE_IMAGE=dersure/php-base-grpc:latest
-                - NGINX_VERSION=alpine
-                - NGINX_ROOT=/var/www/public
-                - APP_WITH_QUEUE=true
-                
-    laravel-rabbitmq:        
-        image: dersure/laravel-rabbitmq
-        build:
-            context: ../
-            dockerfile: ./images/php-nginx/Dockerfile
-            args:
-                - BASE_IMAGE=dersure/php-base-grpc:latest
-                - NGINX_VERSION=alpine
-                - NGINX_ROOT=/var/www/public
-                - APP_WITH_RABBITMQ=true
-                
-    laravel-queue-rabbitmq:        
-        image: dersure/laravel-queue-rabbitmq
-        build:
-            context: ../
-            dockerfile: ./images/php-nginx/Dockerfile
-            args:
-                - BASE_IMAGE=dersure/php-base-grpc:latest
-                - NGINX_VERSION=alpine
-                - NGINX_ROOT=/var/www/public
-                - APP_WITH_QUEUE=true
-                - APP_WITH_RABBITMQ=true
-
-    laravel-queue-rabbitmq-scheduler:        
-        image: dersure/laravel-queue-rabbitmq-scheduler
-        build:
-            context: ../
-            dockerfile: ./images/php-nginx/Dockerfile
-            args:
-                - BASE_IMAGE=dersure/php-base-grpc:latest
-                - NGINX_VERSION=alpine
-                - NGINX_ROOT=/var/www/public
-                - APP_WITH_QUEUE=true
-                - APP_WITH_RABBITMQ=true
-                - APP_WITH_SCHEDULER=true

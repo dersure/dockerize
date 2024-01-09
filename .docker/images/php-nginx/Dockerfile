@@ -3,12 +3,25 @@ FROM ${BASE_IMAGE} as base
 
 LABEL maintainer="Dersure Limited <dev0@dersureltd.com>"
 
+# Accepted values: redis - rabbitmq
+ARG FRAMEWORK="laravel"
+
+# Accepted values: redis - rabbitmq
+ARG QUEUE_CONNECTION="redis"
+
 # Accepted values: app - worker - scheduler
 ARG CONTAINER_MODE=app
 
 ARG APP_WITH_QUEUE=false
 ARG APP_WITH_RABBITMQ=false
 ARG APP_WITH_SCHEDULER=false
+
+ENV CONTAINER_MODE=${CONTAINER_MODE} \
+    APP_WITH_QUEUE=${APP_WITH_QUEUE} \
+    APP_WITH_RABBITMQ=${APP_WITH_RABBITMQ} \
+    APP_WITH_SCHEDULER=${APP_WITH_SCHEDULER} \
+    FRAMEWORK=${FRAMEWORK} \
+    QUEUE_CONNECTION=${QUEUE_CONNECTION}
 
 # Install packages
 RUN apk add --no-cache --update \
@@ -34,53 +47,28 @@ RUN sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" /etc/php${PHP_VERSION}/php-fpm.d/
 # Configure supervisor
 ###########################################
 
-ARG LOG_PATH=/var/log/supervisor
-ARG SUPERVISOR_PORT=9001
-ARG SUPERVISOR_USER_NAME=root
-ARG SUPERVISOR_PASSWORD=123
+ARG PHP_WORKER_PROCESS_NUMBER=2
 
-ENV SUPERVISOR_CONF_PATH=/etc/supervisor/conf.d
-ENV SUPERVISOR_CONF=${SUPERVISOR_CONF_PATH}/supervisord.conf
+ENV LOG_PATH=/var/log/supervisor \
+    SUPERVISOR_PORT=9001 \
+    SUPERVISOR_USER_NAME=root \
+    SUPERVISOR_PASSWORD=123 \
+    PHP_WORKER_PROCESS_NUMBER=${PHP_WORKER_PROCESS_NUMBER}
 
-COPY ./images/php-nginx/config/supervisord.conf ${SUPERVISOR_CONF}
+COPY ./images/php-nginx/config/supervisord* /etc/supervisor/conf.d/
 
-RUN sed -i "s#__LOG_PATH#$LOG_PATH#" ${SUPERVISOR_CONF} \
-    && sed -i "s/__APP_USER_NAME/$APP_USER_NAME/" ${SUPERVISOR_CONF} \
-    && sed -i "s/__SUPERVISOR_PORT/$SUPERVISOR_PORT/" ${SUPERVISOR_CONF} \
-    && sed -i "s/__SUPERVISOR_USER_NAME/$SUPERVISOR_USER_NAME/" ${SUPERVISOR_CONF} \
-    && sed -i "s/__SUPERVISOR_PASSWORD/$SUPERVISOR_PASSWORD/" ${SUPERVISOR_CONF} \
-    && mkdir ${LOG_PATH} \
+# Create directory for custom supervisord configuration
+RUN mkdir /etc/supervisor/conf.d/deployment
+
+RUN mkdir ${LOG_PATH} \
     && chown $APP_USER_NAME:$APP_GROUP_NAME ${LOG_PATH} \
     && chown $APP_USER_NAME:$APP_GROUP_NAME /var/run/
 
 ###########################################
 
 ###########################################
-# Laravel Workers
-###########################################
-
-COPY ./images/php-nginx/config/supervisor/laravel-queue.conf ${SUPERVISOR_CONF_PATH}/queue.conf
-COPY ./images/php-nginx/config/supervisor/laravel-rabbitmq.conf ${SUPERVISOR_CONF_PATH}/rabbitmq.conf
-
-RUN if [ ${CONTAINER_MODE} != 'worker' ] && [ ${APP_WITH_QUEUE} = false ]; then \
-  rm ${SUPERVISOR_CONF_PATH}/queue.conf \
-;fi
-
-RUN if [ ${APP_WITH_RABBITMQ} = false ]; then \
-  rm ${SUPERVISOR_CONF_PATH}/rabbitmq.conf \
-;fi
-
-###########################################
-
-###########################################
 # Laravel scheduler
 ###########################################
-
-COPY ./images/php-nginx/config/supervisor/laravel-scheduler.conf ${SUPERVISOR_CONF_PATH}/scheduler.conf
-
-RUN if [ ${CONTAINER_MODE} != 'scheduler' ] && [ ${APP_WITH_SCHEDULER} = false ]; then \
-  rm ${SUPERVISOR_CONF_PATH}/scheduler.conf \
-;fi
 
 # RUN if [ ${CONTAINER_MODE} = 'scheduler' ] || [ ${APP_WITH_SCHEDULER} = true ]; then \
 #   wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.26/supercronic-linux-amd64" \
@@ -105,8 +93,10 @@ USER $APP_USER_NAME
 # Expose the port nginx is reachable on
 EXPOSE 80 443
 
+ENTRYPOINT ["/usr/bin/start-container"]
+
 # Let supervisord start nginx & php-fpm
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 # Configure a healthcheck to validate that everything is up & running
 HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:80/fpm-ping

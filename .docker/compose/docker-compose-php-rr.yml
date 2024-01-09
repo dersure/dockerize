@@ -2,7 +2,7 @@ version: '3.9'
         
 services:
     php-roadrunner:                 
-        image: dersure/php-roadrunner
+        image: marin63/php-roadrunner
         build:
             context: ../
             dockerfile: ./images/php/roadrunner/Dockerfile

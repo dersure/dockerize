@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+    sample:
+        container_name: sample
+        image: marin63/php-nginx-grpc
+        environment:
+            CONTAINER_MODE: app
+            FRAMEWORK: none

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+env=".docker/.env"
+
+# docker-compose -f .docker/compose/docker-compose-php-base.yml --env-file $env build
+
+docker-compose -f .docker/compose/docker-compose-php-base-production.yml build
+
+sleep 5
+
+docker-compose -f .docker/compose/docker-compose-php-nginx.yml build
+docker-compose -f .docker/compose/docker-compose-php-rr.yml build

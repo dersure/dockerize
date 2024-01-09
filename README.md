@@ -25,3 +25,9 @@ local build
     .DS_Store
     /tests/coverage
     /docker
+
+### Expose events to hook into Containers
+
+- Files from `/etc/supervisor/conf.d/deployment/` will be loaded from `/etc/supervisor/conf.d/supervisord.app.conf`.
+
+- We can also make use of `/opt/docker/provision/entrypoint.d/` to include other configuration event like `bash` script to optimize laravel application.

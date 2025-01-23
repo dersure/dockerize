@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
     php-nginx:                 
         image: marin63/php-nginx
@@ -7,8 +5,19 @@ services:
             context: ../
             dockerfile: ./images/php-nginx/Dockerfile
             args:
+                - BASE_IMAGE=dersure/php-base:8.3
+                - NGINX_VERSION=alpine
+                - NGINX_ROOT=/var/www/public
+
+    php84-nginx:                 
+        image: marin63/php-nginx:8.4
+        build:
+            context: ../
+            dockerfile: ./images/php-nginx/Dockerfile
+            args:
                 - BASE_IMAGE=dersure/php-base:latest
                 - NGINX_VERSION=alpine
+                - NGINX_ROOT=/var/www/public
 
     php-nginx-grpc:             
         image: marin63/php-nginx-grpc

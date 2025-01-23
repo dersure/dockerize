@@ -16,7 +16,7 @@ initialStuff() {
         echo "Optimize laravel application and database migration"
 
         # Clear cache
-        # php artisan cache:clear
+        php artisan cache:clear
         # Optimizing configuration loading
         php artisan config:cache
         # Optimizing route loading

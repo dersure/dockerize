@@ -1,5 +1,3 @@
-version: '3.9'
-        
 services:
     php-base:
         image: ${DOCKER_NAMESPACE?}/php-base-${ENV?}:${TAG?}

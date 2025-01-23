@@ -22,7 +22,6 @@ EXPOSE 9000
 
 # Start php-fpm
 CMD ["php-fpm", "-F"]
-# command=php-fpm82 -F
 
 FROM base as local
 

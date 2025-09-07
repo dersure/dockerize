@@ -6,6 +6,8 @@ Build and start sample container from root
 
 `docker-compose -f .docker/compose/docker-compose-php-base.yml --env-file .docker/.env build`
 
+`docker-compose -f .docker/compose/docker-compose-php-base-production.yml --env-file .docker/.env build`
+
 `docker-compose -f .docker/compose/docker-compose-php-nginx.yml --env-file .docker/.env build`
 
 #### Create and start containers

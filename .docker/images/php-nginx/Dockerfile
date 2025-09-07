@@ -23,6 +23,9 @@ ENV CONTAINER_MODE=${CONTAINER_MODE} \
     FRAMEWORK=${FRAMEWORK} \
     QUEUE_CONNECTION=${QUEUE_CONNECTION}
 
+# Display installed PHP modules for debugging
+RUN echo "=== Installed PHP Modules ===" && php -m
+
 # Install packages
 RUN apk add --no-cache --update \
     nginx \
@@ -85,7 +88,7 @@ COPY ./images/php-nginx/run.sh /usr/bin/start-container
 RUN chmod +x /usr/bin/start-container
 
 # Make sure files/folders needed by the processes are accessable when they run under the nobody user
-RUN chown -R $APP_USER_NAME.$APP_GROUP_NAME $APP_CODE_PATH /run /var/lib/nginx /var/log/nginx
+RUN chown -R $APP_USER_NAME:$APP_GROUP_NAME $APP_CODE_PATH /run /var/lib/nginx /var/log/nginx
 
 # Switch to use a non-root user from here on
 USER $APP_USER_NAME

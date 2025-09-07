@@ -46,6 +46,8 @@ RUN apk --update-cache add ca-certificates && \
         php${PHP_VERSION}-mbstring \
         php${PHP_VERSION}-mysqli \
         php${PHP_VERSION}-pdo_mysql \
+        php${PHP_VERSION}-pgsql \
+        php${PHP_VERSION}-pdo_pgsql \
         php${PHP_VERSION}-pdo_sqlite \
         php${PHP_VERSION}-pdo \
         php${PHP_VERSION}-phar \

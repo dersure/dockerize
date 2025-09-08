@@ -15,13 +15,13 @@ initialStuff() {
     if [ ${framework}  = "laravel" ]; then
         echo "Optimize laravel application and database migration"
 
+        # Run migrations before caching (in case config changes affect DB)
+        php artisan migrate --force
+        
         # Clear cache
         php artisan cache:clear
         php artisan config:clear
         php artisan route:clear
-
-        # Run migrations before caching (in case config changes affect DB)
-        php artisan migrate --force
 
         # Optimizing configuration loading
         php artisan config:cache

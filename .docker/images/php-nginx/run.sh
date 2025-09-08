@@ -17,12 +17,18 @@ initialStuff() {
 
         # Clear cache
         php artisan cache:clear
+        php artisan config:clear
+        php artisan route:clear
+
+        # Run migrations before caching (in case config changes affect DB)
+        php artisan migrate --force
+
         # Optimizing configuration loading
         php artisan config:cache
+
         # Optimizing route loading
         php artisan route:cache
-        # Remove this line if you do not want to run migrations on each build
-        php artisan migrate --force
+
         # Make public files accessible from the web
         php artisan storage:link
     fi
